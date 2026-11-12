@@ -536,6 +536,7 @@ function nextWord() {
   $("feedback").hidden = true;
   $("btn").textContent = "Sprawdź";
   inp.focus();
+  window.scrollTo({top: 0})
 }
 
 function line(label, ...nodes) {
@@ -594,6 +595,7 @@ function check() {
   $("btn").textContent = "Dalej";
   $("btn").focus();
   checked = true;
+  feedback.scrollIntoView({behavior: "smooth", block: "nearest"})
 }
 
 function retryWrong() { startRound(history.filter(x => !x.ok).map(x => x.item)); }
