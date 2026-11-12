@@ -215,8 +215,8 @@ td.wrong { color: var(--bad); font-weight: 600; }
    Żeby dodać kolejny rozdział, dopisz obiekt do SECTIONS i wpis do CHAPTERS.
    ============================================================ */
 const CHAPTERS = [
-  { id: 3, title: "3. /e/", sub: "elephant /ˈeləfənt/" },
-  { id: 4, title: "4. /æ/", sub: "lamb /læm/" }
+  { id: 3, title: "3. /e/" },
+  { id: 4, title: "4. /æ/" }
 ];
 
 const SECTIONS = [
@@ -396,7 +396,7 @@ function selectedItems() {
 }
 function updateStartInfo() {
   const n = selectedItems().length;
-  $("startInfo").textContent = n ? n + " słówek w puli" : "Zaznacz co najmniej jedną sekcję";
+  $("startInfo").textContent = "Zaznacz co najmniej jedną sekcję";
   $("startBtn").disabled = n === 0;
 }
 
@@ -425,7 +425,7 @@ function buildSetup() {
       const box = h("span", "box");
       const t = h("span", "t");
       t.append(h("b", null, s.id), document.createTextNode(s.title));
-      if (s.added) t.append(h("span", "added", "transkrypcje dopisane"));
+      if (s.added) t.append(h("span", "added"));
       box.append(t, h("span", "n", String(s.items.length)));
       lab.append(inp, box);
       chips.append(lab);
