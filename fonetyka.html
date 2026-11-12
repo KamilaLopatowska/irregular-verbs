@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz transkrypcji IPA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&display=swap">
+<style>
+/* Layout: centered 640px column on pink ground. Setup card -> quiz card with symbol palette -> summary table. Styling follows the user's irregular-verbs quiz. */
+:root {
+  --bg: #ffe3ef;
+  --surface: #ffffff;
+  --surface-2: #fff0f6;
+  --fg: #5a2a3c;
+  --muted: #8a5a70;
+  --line: #ffb3d1;
+  --line-soft: #ffd3e4;
+  --accent: #ff4f9a;
+  --accent-hover: #ff2d87;
+  --accent-strong: #e6317f;
+  --accent-deep: #c2185b;
+  --accent-fg: #ffffff;
+  --ok: #1f9d55;
+  --ok-bg: #e3f6ec;
+  --bad: #d6336c;
+  --bad-bg: #ffe0ea;
+  --shadow: rgba(230, 49, 127, 0.18);
+  --ui: "Segoe UI", Arial, sans-serif;
+  --ipa: "Noto Serif", "Gentium Plus", "Charis SIL", "Doulos SIL", "DejaVu Serif", "Times New Roman", serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--ui); text-align: center; }
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+h1 { color: var(--accent-strong); font-size: 2.4rem; line-height: 1.15; margin: 0 0 8px; text-wrap: balance; }
+h2 { color: var(--accent-strong); font-size: 1.6rem; margin: 0; }
+.lead { margin: 0; font-size: 1.05rem; color: var(--fg); }
+.ipa { font-family: var(--ipa); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.card { background: var(--surface); border-radius: 28px; padding: 28px 24px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 8px 24px var(--shadow); }
+
+/* buttons */
+.btn { appearance: none; border: 3px solid var(--accent); background: var(--surface); color: var(--accent-strong); border-radius: 999px; padding: 10px 26px; cursor: pointer; font-weight: bold; font-size: 1.05rem; min-height: 46px; transition: transform 0.1s, box-shadow 0.1s, background 0.15s; }
+.btn:hover { background: var(--bg); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-size: 1.3rem; padding: 12px 36px; box-shadow: 0 4px 0 var(--accent-deep); }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.primary:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-deep); }
+.btn.primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: 0 4px 0 var(--accent-deep); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.ghost:hover { background: var(--bg); color: var(--accent-strong); }
+.btn.small { padding: 4px 16px; min-height: 36px; font-size: 0.9rem; border-width: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+
+/* setup */
+.chapter { display: flex; flex-direction: column; gap: 12px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.chapter-head { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.chapter-head strong { font-size: 1.4rem; color: var(--accent-deep); }
+.chapter-head .ipa { color: var(--muted); font-size: 1rem; }
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.chip { position: relative; display: block; min-width: 0; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; width: 100%; padding: 0; }
+.chip span.box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 8px 12px; border: 3px solid var(--line); border-radius: 20px; background: var(--surface); min-height: 64px; transition: background 0.15s, border-color 0.15s; }
+.chip input:checked + span.box { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chip input:focus-visible + span.box { outline: 3px solid var(--accent-deep); outline-offset: 2px; }
+.chip .t { min-width: 0; font-weight: 600; }
+.chip .t b { margin-right: 4px; font-variant-numeric: tabular-nums; }
+.chip .n { font-size: 0.85rem; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.chip .added { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.85; }
+.opt { display: flex; align-items: flex-start; justify-content: center; gap: 10px; text-align: left; }
+.opt input { margin-top: 4px; width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.opt small { display: block; color: var(--muted); }
+.start-row { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+/* quiz */
+.bar-row { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; justify-content: center; font-variant-numeric: tabular-nums; }
+#progress { font-size: 2rem; font-weight: bold; color: var(--accent-strong); }
+.stats .ok b { color: var(--ok); }
+.stats .bad b { color: var(--bad); }
+.stats b { font-weight: bold; font-size: 1.15rem; }
+.bar { height: 10px; background: var(--line-soft); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.2s; }
+.prompt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.prompt .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.word { font-size: 3rem; line-height: 1.1; font-weight: 600; color: var(--accent-deep); overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; color: var(--muted); font-size: 0.9rem; }
+.tag { background: var(--surface-2); border: 2px solid var(--line-soft); border-radius: 999px; padding: 0 12px; }
+.answer { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.answer label { font-size: 0.95rem; color: var(--muted); }
+.answer input[type="text"] { width: 100%; max-width: 420px; font-family: var(--ipa); font-size: 1.7rem; padding: 8px 20px; border: 3px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg); text-align: center; min-height: 58px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.answer input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255, 79, 154, 0.25); }
+.answer input[type="text"]:disabled { background: var(--surface-2); color: var(--muted); }
+.answer input::placeholder { color: var(--line); }
+.palette { display: flex; flex-direction: column; gap: 10px; }
+.pgroup { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
+.pgroup .gl { flex: 0 0 100%; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.sym { appearance: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-width: 46px; height: 52px; padding: 2px 8px; border: 2px solid var(--line); border-radius: 16px; background: var(--surface); cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.sym:hover { background: var(--bg); border-color: var(--accent); }
+.sym:active { transform: translateY(2px); }
+.sym:disabled { opacity: 0.45; cursor: not-allowed; }
+.sym .g { font-family: var(--ipa); font-size: 1.35rem; line-height: 1.15; color: var(--accent-deep); }
+.sym .k { font-size: 0.65rem; line-height: 1; color: var(--muted); font-family: var(--ui); }
+.actions { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.hint { color: var(--muted); font-size: 0.85rem; }
+.fb { border-radius: 20px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border: 3px solid transparent; align-items: center; }
+.fb.ok { background: var(--ok-bg); border-color: var(--ok); }
+.fb.bad { background: var(--bad-bg); border-color: var(--bad); }
+.fb-head { margin: 0; font-weight: 600; font-size: 1.2rem; }
+.fb.ok .fb-head { color: var(--ok); }
+.fb.bad .fb-head { color: var(--bad); }
+.fb-line { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.fb-line .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.fb-line .val { font-family: var(--ipa); font-size: 1.7rem; overflow-wrap: anywhere; }
+.fb-line .alt { font-family: var(--ipa); font-size: 1.2rem; color: var(--muted); }
+.x { color: var(--bad); font-weight: 600; text-decoration: underline wavy var(--bad); text-underline-offset: 5px; }
+.miss { color: var(--bad); border-bottom: 3px dotted var(--bad); padding: 0 3px; }
+.hit { color: var(--ok); font-weight: 600; text-decoration: underline; text-underline-offset: 5px; }
+
+/* summary */
+.score { font-size: 2rem; font-weight: bold; color: var(--accent-strong); margin: 0; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; border-radius: 16px; box-shadow: 0 8px 24px var(--shadow); background: var(--surface); }
+table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 440px; font-size: 1.05rem; }
+th { background: var(--accent); color: var(--accent-fg); padding: 12px 16px; text-align: center; }
+td { padding: 10px 16px; border-top: 1px solid var(--line-soft); text-align: center; vertical-align: baseline; }
+td.ipa { font-size: 1.2rem; }
+td.good { color: var(--ok); font-weight: 600; }
+td.wrong { color: var(--bad); font-weight: 600; }
+.empty-cell { color: var(--muted); font-family: var(--ui); font-size: 0.85rem; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; }
+  .word { font-size: 2.4rem; }
+  .card { padding: 22px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header>
+    <h1>Quiz transkrypcji IPA</h1>
+    <p class="lead">Dostajesz słowo, zapisujesz je brytyjską wymową razem z akcentem. Odpowiedź jest porównywana z listą z książki.</p>
+  </header>
+
+  <!-- Wybór sekcji -->
+  <section id="setup" class="card" aria-label="Wybór sekcji">
+    <div id="chapters" style="display:flex;flex-direction:column;gap:22px"></div>
+    <label class="opt">
+      <input type="checkbox" id="optStrict" checked>
+      <span>Wymagaj akcentu (ˈ ˌ)
+        <small>Po wyłączeniu znaki akcentu są pomijane przy sprawdzaniu.</small>
+      </span>
+    </label>
+    <div class="start-row">
+      <span id="startInfo" class="hint"></span>
+      <button type="button" class="btn primary" id="startBtn">Start</button>
+    </div>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz" class="card" hidden aria-label="Quiz">
+    <div class="bar-row">
+      <div class="stats" aria-live="polite">
+        <span id="progress"></span>
+        <span class="ok">Dobrze <b id="correct">0</b></span>
+        <span class="bad">Źle <b id="wrong">0</b></span>
+      </div>
+      <div class="row">
+        <button type="button" class="btn small ghost" id="toSetup">Zmień sekcje</button>
+        <button type="button" class="btn small" id="finishNow">Zakończ teraz</button>
+      </div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+
+    <div class="prompt">
+      <span class="label">Zapisz fonetycznie</span>
+      <div class="word" id="word"></div>
+      <div class="meta"><span class="tag" id="secTag"></span><span id="noteTag"></span></div>
+    </div>
+
+    <form id="form" autocomplete="off" style="display:flex;flex-direction:column;gap:16px">
+      <div class="answer">
+        <label for="ans">Twoja transkrypcja</label>
+        <input type="text" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="np. ˈeləfənt">
+      </div>
+      <div class="palette" id="palette" role="group" aria-label="Symbole fonetyczne"></div>
+      <div class="actions">
+        <button type="submit" class="btn primary" id="btn">Sprawdź</button>
+        <span class="hint">Enter: sprawdź / dalej. Skróty: pole przyjmuje też zapis z małym znaczkiem pod symbolem, np. @ daje ə.</span>
+      </div>
+    </form>
+
+    <div id="feedback" class="fb" hidden aria-live="polite"></div>
+  </section>
+
+  <!-- Podsumowanie -->
+  <section id="summary" class="card" hidden aria-label="Podsumowanie"></section>
+</main>
+
+<script>
+/* ============================================================
+   DANE. Format wpisu: [słowo, transkrypcja z książki, [inne akceptowane], notka]
+   Znaki: ɡ to U+0261 (IPA), ᵊ to indeks górny (opcjonalne ə).
+   Sekcje z added:true nie mają transkrypcji w książce, dopisane przez Claude (RP).
+   Żeby dodać kolejny rozdział, dopisz obiekt do SECTIONS i wpis do CHAPTERS.
+   ============================================================ */
+const CHAPTERS = [
+  { id: 3, title: "3. /e/", sub: "elephant /ˈeləfənt/" },
+  { id: 4, title: "4. /æ/", sub: "lamb /læm/" }
+];
+
+const SECTIONS = [
+  { id: "3.1", ch: 3, title: "Words for practice 1", items: [
+    ["ate","et"],["met","met"],["says","sez"],["said","sed"],["spread","spred"],["debt","det"],["health","helθ"],["wealth","welθ"],
+    ["steady","ˈstedi"],["bury","ˈberi"],["breakfast","ˈbrekfəst"],["jealous","ˈdʒeləs"],["leisure","ˈleʒə"],["measure","ˈmeʒə"],["treasure","ˈtreʒə"],["pleasure","ˈpleʒə"],
+    ["offence","əˈfens"],["spaghetti","spəˈɡeti"],["indelible","ɪnˈdeləbl",["ɪnˈdeləbᵊl"]],["inedible","ɪnˈedɪbl",["ɪnˈedɪbᵊl"]],["recollect","ˌrekəˈlekt"],["refugee","ˌrefjuˈdʒiː"]
+  ]},
+  { id: "3.3", ch: 3, title: "Words for practice 2", items: [
+    ["peasant","ˈpezᵊnt"],["pheasant","ˈfezᵊnt"],["desert","ˈdezət",[],"n."],["shepherd","ˈʃepəd"],["decade","ˈdekeɪd"],["threaten","ˈθretᵊn"],
+    ["remedy","ˈremədi"],["replica","ˈreplɪkə"],["stereo","ˈsteriəʊ"],["precipice","ˈpresəpɪs"],["jeopardize","ˈdʒepədaɪz"],["treachery","ˈtretʃəri"],
+    ["possessive","pəˈzesɪv"],["progressive","prəˈɡresɪv"],["development","dɪˈveləpmənt",["diˈveləpmənt"]],["telegraphy","təˈleɡrəfi"]
+  ]},
+  { id: "3.4", ch: 3, title: "Proper names", items: [
+    ["Thames","ˈtemz"],["Reading","ˈredɪŋ"],["Leicester","ˈlestə"],["Greenwich","ˈɡrenɪtʃ"],["Celtic","ˈkeltɪk"],["Geoffrey","ˈdʒefri"],["Leslie","ˈlezli"],["Leonard","ˈlenəd"],["Presley","ˈprezli"],["Reynolds","ˈrenəldz"]
+  ]},
+  { id: "3.5", ch: 3, title: "Deceptive spelling", items: [
+    ["lead","led",[],"metal"],["tread","tred"],["realm","relm"],["cleanse","klenz"],["stealth","stelθ"],["wealth","welθ"],
+    ["heather","ˈheðə"],["leather","ˈleðə"],["leopard","ˈlepəd"],["sweatshirt","ˈswetʃɜːt"],["weapon","ˈwepən"],["threepence","ˈθrepəns"],["meadow","ˈmedəʊ"],["debris","ˈdebri"],
+    ["cleanliness","ˈklenlinəs",["ˈklenlɪnəs"]],["readiness","ˈredinəs",["ˈredɪnəs"]],["endeavour","ɪnˈdevə"],["lieutenant","lefˈtenənt"]
+  ]},
+  { id: "4.1", ch: 4, title: "Words for practice 1", items: [
+    ["add","æd"],["ant","ænt"],["bad","bæd"],["cat","kæt"],["sang","sæŋ"],["bang","bæŋ"],["lamb","læm"],["swam","swæm"],["mass","mæs"],["quack","kwæk"],
+    ["apple","ˈæpl",["ˈæpᵊl"]],["cattle","ˈkætl",["ˈkætᵊl"]],["album","ˈælbəm"],["access","ˈækses"],["marry","ˈmæri"],["carry","ˈkæri"],["valley","ˈvæli"],["rally","ˈræli"],["pasta","ˈpæstə"],["café","ˈkæfeɪ"],
+    ["cabbage","ˈkæbɪdʒ"],["damage","ˈdæmɪdʒ"],["marriage","ˈmærɪdʒ"],["savage","ˈsævɪdʒ"],["palace","ˈpæləs"],["malice","ˈmælɪs"],["racket","ˈrækɪt"],["packet","ˈpækɪt"],
+    ["animal","ˈænɪmᵊl"],["natural","ˈnætʃᵊrəl"],["national","ˈnæʃᵊnəl"],["rational","ˈræʃᵊnəl"],["amateur","ˈæmətə"],["massacre","ˈmæsəkə"],
+    ["banal","bəˈnæl"],["canal","kəˈnæl"],["piano","piˈænəʊ"],["lasagna","ləˈzænjə"]
+  ]},
+  { id: "4.2", ch: 4, title: "Clipping", added: true, items: [
+    ["bad","bæd"],["bat","bæt"],["cad","kæd"],["cat","kæt"],["pad","pæd"],["pat","pæt"],
+    ["bag","bæɡ"],["back","bæk"],["sag","sæɡ"],["sack","sæk"],["flags","flæɡz"],["flax","flæks"]
+  ]},
+  { id: "4.3", ch: 4, title: "Minimal pairs", added: true, items: [
+    ["guest","ɡest"],["gassed","ɡæst"],["mesh","meʃ"],["mash","mæʃ"],["dead","ded"],["dad","dæd"],["sect","sekt"],["sacked","sækt"],["dregs","dreɡz"],["drags","dræɡz"],
+    ["less","les"],["lass","læs"],["fed","fed"],["fad","fæd"],["pen","pen"],["pan","pæn"],["pent","pent"],["pant","pænt"],["send","send"],["sand","sænd"],
+    ["pet","pet"],["pad","pæd"],["pat","pæt"],["head","hed"],["had","hæd"],["hat","hæt"],["bed","bed"],["bad","bæd"],["bat","bæt"],["met","met"],["mad","mæd"],["mat","mæt"],["set","set"],["sad","sæd"],["sat","sæt"]
+  ]},
+  { id: "4.5", ch: 4, title: "Words for practice 2", items: [
+    ["asthma","ˈæsmə"],["mafia","ˈmæfiə"],["lambda","ˈlæmdə"],["larynx","ˈlærɪŋks"],["rabbi","ˈræbaɪ"],["maniac","ˈmeɪniæk"],["sandwich","ˈsændwɪdʒ",["ˈsænwɪdʒ"]],["language","ˈlæŋɡwɪdʒ"],["soundtrack","ˈsaʊndtræk"],["programme","ˈprəʊɡræm"],
+    ["palatal","ˈpælətl",["ˈpælətᵊl"]],["paraphrase","ˈpærəfreɪz"],["actually","ˈæktʃuəli"],["category","ˈkætəɡəri"],["telegram","ˈtelɪɡræm",["ˈteləɡræm"]],["laundromat","ˈlɔːndrəmæt"],
+    ["patriotic","ˈpætriɒtɪk",["ˌpætriˈɒtɪk"]],["sarcastic","sɑːˈkæstɪk"],["managerial","ˌmænəˈdʒɪəriəl"],["mistranslation","ˌmɪstrænzˈleɪʃᵊn"],
+    ["ambiguous","æmˈbɪɡjʊəs"],["ambassador","æmˈbæsədə"],["rectangular","rekˈtæŋɡjʊlə"],["magnanimous","mæɡˈnænɪməs"],
+    ["laparoscopy","ˌlæpəˈrɒskəpi"],["solidarity","ˌsɒlɪˈdærəti"],["mathematical","ˌmæθəˈmætɪkᵊl"],["multilateral","ˌmʌltiˈlætᵊrəl"]
+  ]},
+  { id: "4.6", ch: 4, title: "Deceptive spelling", items: [
+    ["plaid","ˈplæd"],["patio","ˈpætiəʊ"],["salmon","ˈsæmən"],["manor","ˈmænə"],["ration","ˈræʃᵊn"],["famine","ˈfæmɪn"],
+    ["pageant","ˈpædʒənt"],["stagnant","ˈstæɡnənt"],["vacuum","ˈvækjʊm",["ˈvækjuəm"]],["tapestry","ˈtæpɪstri"]
+  ]},
+  { id: "4.7", ch: 4, title: "Proper names", items: [
+    ["Dante","ˈdænti"],["Thackeray","ˈθækəri"],["Raphael","ˈræfeɪəl"],["Amsterdam","ˈæmstədæm"],["Pascal","pæˈskæl"],["Siam","saɪˈæm"],
+    ["Japan","dʒəˈpæn"],["Alaska","əˈlæskə"],["Niagara","naɪˈæɡərə"],["Nebraska","nəˈbræskə"]
+  ]}
+];
+
+SECTIONS.forEach(s => {
+  s.items = s.items.map(([w, ipa, alts = [], note = ""]) => ({ w, ipa, alts, note, sec: s.id, secTitle: s.title }));
+});
+
+/* ============================================================
+   Porównywanie
+   ============================================================ */
+// Skróty: to, co wpisujesz, zamienia się na symbol (zapis jak w X-SAMPA). Litery zwykłe zostają bez zmian.
+const KEYMAP = {
+  "@": "ə", "{": "æ", "&": "æ", "I": "ɪ", "U": "ʊ", "Q": "ɒ", "V": "ʌ", "O": "ɔ", "A": "ɑ", "3": "ɜ",
+  "T": "θ", "D": "ð", "S": "ʃ", "Z": "ʒ", "N": "ŋ", "g": "ɡ",
+  ":": "ː", "'": "ˈ", "%": "ˌ", "#": "ᵊ"
+};
+
+function applyKeymap(s) {
+  let out = "";
+  for (const ch of s) out += KEYMAP[ch] || ch;
+  return out;
+}
+
+// Sprowadza zapis do postaci porównywalnej.
+function norm(s, ignoreStress) {
+  let t = applyKeymap(s.normalize("NFC"));
+  t = t.replace(/[\s\/\[\]().|_̩͜͡]/g, "");   // spacje, slashe, nawiasy, kropki sylab, znak sylabiczności, łuk
+  t = t.replace(/ᵊ/g, "ə").replace(/ɹ/g, "r").replace(/ɛ/g, "e").replace(/ʧ/g, "tʃ").replace(/ʤ/g, "dʒ").replace(/,/g, "ˌ");
+  if (ignoreStress) t = t.replace(/[ˈˌ]/g, "");
+  return t;
+}
+
+function syllables(f) {
+  const t = f.replace(/ː/g, "");
+  const m = t.match(/[iɪeæʌʊɒəɑɔɜuaᵊ]+/g);
+  // spółgłoska sylabiczna na końcu (ˈæpl, ˈkætl) liczy się jako osobna sylaba
+  return (m ? m.length : 0) + (/[bptkdɡfvszʃʒmn]l$/.test(t) ? 1 : 0);
+}
+
+// Wszystkie akceptowane zapisy słowa (już znormalizowane).
+function accepted(item, ignoreStress) {
+  const set = new Set();
+  for (const f of [item.ipa, ...item.alts]) {
+    set.add(f);
+    if (f.includes("ᵊ")) set.add(f.replace(/ᵊ/g, ""));            // ᵊ oznacza dźwięk opcjonalny
+    if (syllables(f) === 1) {                                      // słowa jednosylabowe: z akcentem i bez
+      const bare = f.replace(/[ˈˌ]/g, "");
+      set.add(bare); set.add("ˈ" + bare);
+    }
+  }
+  return [...new Set([...set].map(f => norm(f, ignoreStress)))];
+}
+
+function tokens(s) {
+  const out = [];
+  for (const ch of s) {
+    if (ch === "ː" && out.length) out[out.length - 1] += ch; else out.push(ch);
+  }
+  return out;
+}
+
+// Wyrównanie dwóch ciągów symboli (odległość edycyjna). Zwraca listę operacji.
+function align(a, b) {
+  const n = a.length, m = b.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = 0; i <= n; i++) dp[i][0] = i;
+  for (let j = 0; j <= m; j++) dp[0][j] = j;
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) {
+    dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  }
+  const ops = [];
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i - 1] === b[j - 1] && dp[i][j] === dp[i - 1][j - 1]) { ops.push({ t: "eq", a: a[i - 1], b: b[j - 1] }); i--; j--; }
+    else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) { ops.push({ t: "sub", a: a[i - 1], b: b[j - 1] }); i--; j--; }
+    else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) { ops.push({ t: "ins", a: a[i - 1] }); i--; }
+    else { ops.push({ t: "del", b: b[j - 1] }); j--; }
+  }
+  return ops.reverse();
+}
+
+function bestMatch(ans, forms) {
+  let best = forms[0], bd = Infinity;
+  const ta = tokens(ans);
+  for (const f of forms) {
+    const d = align(ta, tokens(f)).filter(o => o.t !== "eq").length;
+    if (d < bd) { bd = d; best = f; }
+  }
+  return best;
+}
+
+function dedupe(items) {
+  const seen = new Set(), out = [];
+  for (const it of items) {
+    const key = it.w.toLowerCase() + "|" + it.note;
+    if (!seen.has(key)) { seen.add(key); out.push(it); }
+  }
+  return out;
+}
+
+/*DOM*/
+/* ============================================================
+   Interfejs
+   ============================================================ */
+const $ = id => document.getElementById(id);
+function h(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+const STORE_KEY = "ipaquiz.v1";
+function loadPrefs() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; } }
+function savePrefs() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ sections: selected(), strict: $("optStrict").checked })); } catch (e) { /* brak storage, trudno */ }
+}
+
+let pool = [], order = [], current = null, checked = false, correct = 0, total = 0, history = [], strict = true;
+
+/* ---------- wybór sekcji ---------- */
+function selected() { return [...document.querySelectorAll("#chapters input[type=checkbox]:checked")].map(i => i.value); }
+function selectedItems() {
+  const ids = new Set(selected());
+  return dedupe(SECTIONS.filter(s => ids.has(s.id)).flatMap(s => s.items));
+}
+function updateStartInfo() {
+  const n = selectedItems().length;
+  $("startInfo").textContent = n ? n + " słówek w puli" : "Zaznacz co najmniej jedną sekcję";
+  $("startBtn").disabled = n === 0;
+}
+
+function buildSetup() {
+  const prefs = loadPrefs();
+  const chosen = prefs && Array.isArray(prefs.sections) ? new Set(prefs.sections) : null;
+  if (prefs && typeof prefs.strict === "boolean") $("optStrict").checked = prefs.strict;
+  const root = $("chapters");
+  CHAPTERS.forEach(ch => {
+    const fs = h("fieldset", "chapter");
+    const head = h("div", "chapter-head");
+    const left = h("div", "row");
+    left.append(h("strong", null, ch.title), h("span", "ipa", ch.sub));
+    const tog = h("button", "btn small ghost", "Zaznacz / odznacz");
+    tog.type = "button";
+    head.append(left, tog);
+    const legend = h("legend", null, ch.title);
+    legend.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)";
+    const chips = h("div", "chips");
+    SECTIONS.filter(s => s.ch === ch.id).forEach(s => {
+      const lab = h("label", "chip");
+      const inp = document.createElement("input");
+      inp.type = "checkbox"; inp.value = s.id;
+      inp.checked = chosen ? chosen.has(s.id) : true;
+      inp.addEventListener("change", () => { updateStartInfo(); savePrefs(); });
+      const box = h("span", "box");
+      const t = h("span", "t");
+      t.append(h("b", null, s.id), document.createTextNode(s.title));
+      if (s.added) t.append(h("span", "added", "transkrypcje dopisane"));
+      box.append(t, h("span", "n", String(s.items.length)));
+      lab.append(inp, box);
+      chips.append(lab);
+    });
+    tog.addEventListener("click", () => {
+      const boxes = [...chips.querySelectorAll("input")];
+      const all = boxes.every(b => b.checked);
+      boxes.forEach(b => { b.checked = !all; });
+      updateStartInfo(); savePrefs();
+    });
+    fs.append(legend, head, chips);
+    root.append(fs);
+  });
+  $("optStrict").addEventListener("change", savePrefs);
+  updateStartInfo();
+}
+
+/* ---------- paleta symboli ---------- */
+const PALETTE = [
+  ["Samogłoski", [["ɪ","I"],["e","e"],["æ","{"],["ʌ","V"],["ʊ","U"],["ɒ","Q"],["ə","@"],["ᵊ","#"],["ɑ","A"],["ɔ","O"],["ɜ","3"],["i","i"],["u","u"],["ː",":"]]],
+  ["Dyftongi", [["eɪ","eI"],["aɪ","aI"],["ɔɪ","OI"],["əʊ","@U"],["aʊ","aU"],["ɪə","I@"],["eə","e@"],["ʊə","U@"]]],
+  ["Spółgłoski", [["θ","T"],["ð","D"],["ʃ","S"],["ʒ","Z"],["ŋ","N"],["ɡ","g"],["tʃ","tS"],["dʒ","dZ"]]],
+  ["Akcent", [["ˈ","'"],["ˌ","%"]]]
+];
+
+function buildPalette() {
+  const root = $("palette");
+  PALETTE.forEach(([name, syms]) => {
+    const g = h("div", "pgroup");
+    g.append(h("span", "gl", name));
+    syms.forEach(([glyph, key]) => {
+      const b = h("button", "sym");
+      b.type = "button";
+      b.setAttribute("aria-label", "Wstaw " + glyph);
+      b.append(h("span", "g", glyph), h("span", "k", key));
+      b.addEventListener("mousedown", e => e.preventDefault());   // nie zabieraj fokusu polu
+      b.addEventListener("click", () => insertText(glyph));
+      g.append(b);
+    });
+    root.append(g);
+  });
+}
+
+function insertText(txt) {
+  if (checked) return;
+  const el = $("ans");
+  const s = el.selectionStart ?? el.value.length, e = el.selectionEnd ?? el.value.length;
+  el.setRangeText(txt, s, e, "end");
+  el.focus();
+}
+
+// Zamiana skrótów na symbole w trakcie pisania (podmiana 1 znak na 1 znak, więc kursor zostaje na miejscu).
+$("ans").addEventListener("input", ev => {
+  if (ev.isComposing) return;
+  const el = ev.target, v = el.value, nv = applyKeymap(v);
+  if (nv !== v) {
+    const s = el.selectionStart, e = el.selectionEnd;
+    el.value = nv;
+    el.setSelectionRange(s, e);
+  }
+});
+
+/* ---------- przebieg quizu ---------- */
+function show(which) {
+  $("setup").hidden = which !== "setup";
+  $("quiz").hidden = which !== "quiz";
+  $("summary").hidden = which !== "summary";
+}
+
+function updateScore() {
+  $("progress").textContent = total + " / " + pool.length;
+  $("correct").textContent = correct;
+  $("wrong").textContent = total - correct;
+  $("barFill").style.width = (pool.length ? (total / pool.length) * 100 : 0) + "%";
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startRound(list) {
+  pool = list;
+  order = shuffle(list.slice());
+  history = []; correct = 0; total = 0;
+  strict = $("optStrict").checked;
+  show("quiz");
+  updateScore();
+  nextWord();
+}
+
+function nextWord() {
+  if (order.length === 0) { showSummary(); return; }
+  current = order.pop();
+  checked = false;
+  $("word").textContent = current.w;
+  $("secTag").textContent = current.sec + " " + current.secTitle;
+  $("noteTag").textContent = current.note ? "(" + current.note + ")" : "";
+  const inp = $("ans");
+  inp.value = ""; inp.disabled = false;
+  $("feedback").hidden = true;
+  $("btn").textContent = "Sprawdź";
+  inp.focus();
+}
+
+function line(label, ...nodes) {
+  const d = h("div", "fb-line");
+  const v = h("span", "val");
+  v.append(...nodes);
+  d.append(h("span", "lbl", label), v);
+  return d;
+}
+
+function userNodes(ops) {
+  return ops.map(o => {
+    if (o.t === "eq") return document.createTextNode(o.a);
+    if (o.t === "del") return h("span", "miss", "·");
+    return h("span", "x", o.a);
+  });
+}
+function targetNodes(ops) {
+  return ops.filter(o => o.t !== "ins").map(o => o.t === "eq" ? document.createTextNode(o.b) : h("span", "hit", o.b));
+}
+
+function check() {
+  const raw = $("ans").value;
+  const ans = norm(raw, !strict);
+  const forms = accepted(current, !strict);
+  const ok = ans !== "" && forms.includes(ans);
+  const best = bestMatch(ans, forms);
+
+  total++;
+  if (ok) correct++;
+  history.push({ item: current, answer: raw.trim(), ok });
+
+  const fb = $("feedback");
+  fb.className = "fb " + (ok ? "ok" : "bad");
+  fb.hidden = false;
+  fb.replaceChildren();
+  fb.append(h("p", "fb-head", ok ? "Dobrze." : "Jeszcze nie."));
+
+  if (ok) {
+    fb.append(line("Książka", document.createTextNode(current.ipa)));
+  } else {
+    if (ans === "") {
+      fb.append(line("Ty", h("span", "alt", "(pusto)")));
+      fb.append(line("Poprawnie", document.createTextNode(strict ? best : current.ipa)));
+    } else {
+      const ops = align(tokens(ans), tokens(best));
+      fb.append(line("Ty", ...userNodes(ops)));
+      fb.append(line("Poprawnie", ...targetNodes(ops)));
+      if (!strict) fb.append(line("Z akcentem", document.createTextNode(current.ipa)));
+    }
+  }
+  if (current.alts.length) fb.append(line("Też dobrze", h("span", "alt", current.alts.join("   "))));
+
+  updateScore();
+  $("ans").disabled = true;
+  $("btn").textContent = "Dalej";
+  $("btn").focus();
+  checked = true;
+}
+
+function retryWrong() { startRound(history.filter(x => !x.ok).map(x => x.item)); }
+
+function showSummary() {
+  show("summary");
+  const root = $("summary");
+  root.replaceChildren();
+  const wrongCount = total - correct;
+  root.append(h("h2", null, "Podsumowanie"));
+  root.append(h("p", "score", correct + " / " + total + " poprawnie"));
+  const row = h("div", "row");
+  const again = h("button", "btn primary", "Od nowa (cała pula)");
+  again.type = "button";
+  again.addEventListener("click", () => startRound(pool.length ? pool : selectedItems()));
+  row.append(again);
+  if (wrongCount > 0) {
+    const rw = h("button", "btn", "Tylko błędne (" + wrongCount + ")");
+    rw.type = "button";
+    rw.addEventListener("click", retryWrong);
+    row.append(rw);
+  }
+  const back = h("button", "btn ghost", "Zmień sekcje");
+  back.type = "button";
+  back.addEventListener("click", () => show("setup"));
+  row.append(back);
+  root.append(row);
+
+  if (history.length) {
+    const wrap = h("div", "table-wrap");
+    const t = document.createElement("table");
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    ["Słowo", "Twoja odpowiedź", "Książka"].forEach(x => hr.append(h("th", null, x)));
+    thead.append(hr);
+    const tb = document.createElement("tbody");
+    history.forEach(x => {
+      const tr = document.createElement("tr");
+      const w = h("td", null, x.item.w + (x.item.note ? " (" + x.item.note + ")" : ""));
+      const a = h("td", "ipa " + (x.ok ? "good" : "wrong"));
+      if (x.answer) a.textContent = x.answer; else a.append(h("span", "empty-cell", "(pusto)"));
+      tr.append(w, a, h("td", "ipa", x.item.ipa));
+      tb.append(tr);
+    });
+    t.append(thead, tb);
+    wrap.append(t);
+    root.append(wrap);
+  }
+}
+
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  if (checked) nextWord(); else check();
+});
+$("startBtn").addEventListener("click", () => { const items = selectedItems(); if (items.length) startRound(items); });
+$("toSetup").addEventListener("click", () => show("setup"));
+$("finishNow").addEventListener("click", showSummary);
+
+buildSetup();
+buildPalette();
+show("setup");
+</script>
+</body>
+</html>
