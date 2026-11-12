@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Irregular verbs</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Irregular verbs</h1>
+<p id="progress"></p>
+<p>Correct: <span id="correct">0</span> | Wrong: <span id="wrong">0</span></p>
+
+<form id="form" autocomplete="off">
+  <h2 id="base"></h2>
+  <p>Past simple: <input id="past" autofocus></p>
+  <p>Past participle: <input id="pp"></p>
+  <button id="btn">Check</button>
+  <button type="button" onclick="showSummary()">Finish now</button>
+</form>
+
+<p id="result"></p>
+
+<div id="summary"></div>
+
+<script>
+const verbs = [{"base": "arise", "past": ["arose"], "pp": ["arisen"]}, {"base": "awake", "past": ["awoke", "awaked"], "pp": ["awoken", "awaked"]}, {"base": "be", "past": ["was", "were"], "pp": ["been"]}, {"base": "bear", "past": ["bore"], "pp": ["borne"]}, {"base": "beat", "past": ["beat"], "pp": ["beaten", "beat"]}, {"base": "become", "past": ["became"], "pp": ["become"]}, {"base": "begin", "past": ["began", "begun"], "pp": ["begun"]}, {"base": "behold", "past": ["beheld"], "pp": ["beheld"]}, {"base": "bend", "past": ["bent"], "pp": ["bent"]}, {"base": "bet", "past": ["bet", "betted"], "pp": ["bet", "betted"]}, {"base": "bid", "past": ["bid", "bade"], "pp": ["bid", "bidden"]}, {"base": "bind", "past": ["bound"], "pp": ["bound"]}, {"base": "bite", "past": ["bit"], "pp": ["bitten", "bit"]}, {"base": "bleed", "past": ["bled"], "pp": ["bled"]}, {"base": "blow", "past": ["blew"], "pp": ["blown"]}, {"base": "break", "past": ["broke"], "pp": ["broken"]}, {"base": "breed", "past": ["bred"], "pp": ["bred"]}, {"base": "bring", "past": ["brought"], "pp": ["brought"]}, {"base": "broadcast", "past": ["broadcast"], "pp": ["broadcast"]}, {"base": "browbeat", "past": ["browbeat"], "pp": ["browbeaten"]}, {"base": "build", "past": ["built"], "pp": ["built"]}, {"base": "burn", "past": ["burned", "burnt"], "pp": ["burned", "burnt"]}, {"base": "burst", "past": ["burst"], "pp": ["burst"]}, {"base": "bust", "past": ["bust", "busted"], "pp": ["bust", "busted"]}, {"base": "buy", "past": ["bought"], "pp": ["bought"]}, {"base": "cast", "past": ["cast"], "pp": ["cast"]}, {"base": "catch", "past": ["caught"], "pp": ["caught"]}, {"base": "choose", "past": ["chose"], "pp": ["chosen"]}, {"base": "cleave", "past": ["cleaved", "clove", "cleft"], "pp": ["cleaved", "cloven", "cleft"]}, {"base": "cling", "past": ["clung"], "pp": ["clung"]}, {"base": "come", "past": ["came"], "pp": ["come"]}, {"base": "cost", "past": ["cost"], "pp": ["cost"]}, {"base": "creep", "past": ["crept"], "pp": ["crept"]}, {"base": "cut", "past": ["cut"], "pp": ["cut"]}, {"base": "deal", "past": ["dealt"], "pp": ["dealt"]}, {"base": "deepfreeze", "past": ["deepfroze"], "pp": ["deepfrozen"]}, {"base": "dig", "past": ["dug"], "pp": ["dug"]}, {"base": "dive", "past": ["dived", "dove"], "pp": ["dived"]}, {"base": "do", "past": ["did"], "pp": ["done"]}, {"base": "draw", "past": ["drew"], "pp": ["drawn"]}, {"base": "dream", "past": ["dreamt", "dreamed"], "pp": ["dreamt", "dreamed"]}, {"base": "drink", "past": ["drank"], "pp": ["drunk"]}, {"base": "drive", "past": ["drove"], "pp": ["driven"]}, {"base": "dwell", "past": ["dwelled", "dwelt"], "pp": ["dwelled", "dwelt"]}, {"base": "eat", "past": ["ate"], "pp": ["eaten"]}, {"base": "fall", "past": ["fell"], "pp": ["fallen"]}, {"base": "feed", "past": ["fed"], "pp": ["fed"]}, {"base": "feel", "past": ["felt"], "pp": ["felt"]}, {"base": "fight", "past": ["fought"], "pp": ["fought"]}, {"base": "find", "past": ["found"], "pp": ["found"]}, {"base": "fit", "past": ["fitted", "fit"], "pp": ["fitted", "fit"]}, {"base": "flee", "past": ["fled"], "pp": ["fled"]}, {"base": "fling", "past": ["flung"], "pp": ["flung"]}, {"base": "fly", "past": ["flew"], "pp": ["flown"]}, {"base": "forbid", "past": ["forbad", "forbade"], "pp": ["forbidden", "forbid"]}, {"base": "forecast", "past": ["forecast"], "pp": ["forecast"]}, {"base": "foresee", "past": ["foresaw"], "pp": ["foreseen"]}, {"base": "foretell", "past": ["foretold"], "pp": ["foretold"]}, {"base": "forget", "past": ["forgot"], "pp": ["forgotten", "forgot"]}, {"base": "forgive", "past": ["forgave"], "pp": ["forgiven"]}, {"base": "freeze", "past": ["froze"], "pp": ["frozen"]}, {"base": "get", "past": ["got"], "pp": ["got", "gotten"]}, {"base": "give", "past": ["gave"], "pp": ["given"]}, {"base": "go", "past": ["went"], "pp": ["gone"]}, {"base": "grind", "past": ["ground"], "pp": ["ground"]}, {"base": "grow", "past": ["grew"], "pp": ["grown"]}, {"base": "hamstring", "past": ["hamstrung"], "pp": ["hamstrung"]}, {"base": "hang", "past": ["hung", "hanged"], "pp": ["hung", "hanged"]}, {"base": "have", "past": ["had"], "pp": ["had"]}, {"base": "hear", "past": ["heard"], "pp": ["heard"]}, {"base": "hew", "past": ["hewed"], "pp": ["hewn", "hewed"]}, {"base": "hide", "past": ["hid"], "pp": ["hidden", "hid"]}, {"base": "hit", "past": ["hit"], "pp": ["hit"]}, {"base": "hold", "past": ["held"], "pp": ["held"]}, {"base": "hurt", "past": ["hurt"], "pp": ["hurt"]}, {"base": "input", "past": ["input", "inputted"], "pp": ["input", "inputted"]}, {"base": "keep", "past": ["kept"], "pp": ["kept"]}, {"base": "kneel", "past": ["knelt", "kneeled"], "pp": ["knelt", "kneeled"]}, {"base": "knit", "past": ["knit", "knitted"], "pp": ["knit", "knitted"]}, {"base": "know", "past": ["knew"], "pp": ["known"]}, {"base": "lay", "past": ["laid"], "pp": ["laid"]}, {"base": "lead", "past": ["led"], "pp": ["led"]}, {"base": "lean", "past": ["leant", "leaned"], "pp": ["leant", "leaned"]}, {"base": "leap", "past": ["leapt", "leaped"], "pp": ["leapt", "leaped"]}, {"base": "learn", "past": ["learned", "learnt"], "pp": ["learned", "learnt"]}, {"base": "leave", "past": ["left"], "pp": ["left"]}, {"base": "lend", "past": ["lent"], "pp": ["lent"]}, {"base": "let", "past": ["let"], "pp": ["let"]}, {"base": "lie", "past": ["lay"], "pp": ["lain"]}, {"base": "light", "past": ["lit", "lighted"], "pp": ["lit", "lighted"]}, {"base": "lose", "past": ["lost"], "pp": ["lost"]}, {"base": "make", "past": ["made"], "pp": ["made"]}, {"base": "mean", "past": ["meant"], "pp": ["meant"]}, {"base": "meet", "past": ["met"], "pp": ["met"]}, {"base": "miscast", "past": ["miscast"], "pp": ["miscast"]}, {"base": "mishear", "past": ["misheard"], "pp": ["misheard"]}, {"base": "mislead", "past": ["misled"], "pp": ["misled"]}, {"base": "misspell", "past": ["misspelled", "misspelt"], "pp": ["misspelled", "misspelt"]}, {"base": "mistake", "past": ["mistook"], "pp": ["mistaken"]}, {"base": "misunderstand", "past": ["misunderstood"], "pp": ["misunderstood"]}, {"base": "mow", "past": ["mowed"], "pp": ["mown", "mowed"]}, {"base": "offset", "past": ["offset"], "pp": ["offset"]}, {"base": "outbid", "past": ["outbid"], "pp": ["outbid"]}, {"base": "outdo", "past": ["outdid"], "pp": ["outdone"]}, {"base": "outgrow", "past": ["outgrew"], "pp": ["outgrown"]}, {"base": "outrun", "past": ["outran"], "pp": ["outrun"]}, {"base": "overcome", "past": ["overcame"], "pp": ["overcome"]}, {"base": "overdo", "past": ["overdid"], "pp": ["overdone"]}, {"base": "overeat", "past": ["overate"], "pp": ["overeaten"]}, {"base": "overfeed", "past": ["overfed"], "pp": ["overfed"]}, {"base": "overhear", "past": ["overheard"], "pp": ["overheard"]}, {"base": "overrun", "past": ["overran"], "pp": ["overrun"]}, {"base": "oversee", "past": ["oversaw"], "pp": ["overseen"]}, {"base": "oversleep", "past": ["overslept"], "pp": ["overslept"]}, {"base": "overtake", "past": ["overtook"], "pp": ["overtaken"]}, {"base": "overthrow", "past": ["overthrew"], "pp": ["overthrown"]}, {"base": "pay", "past": ["paid"], "pp": ["paid"]}, {"base": "put", "past": ["put"], "pp": ["put"]}, {"base": "quit", "past": ["quit", "quitted"], "pp": ["quit", "quitted"]}, {"base": "read", "past": ["read"], "pp": ["read"]}, {"base": "rebuild", "past": ["rebuilt"], "pp": ["rebuilt"]}, {"base": "recast", "past": ["recast"], "pp": ["recast"]}, {"base": "redo", "past": ["redid"], "pp": ["redone"]}, {"base": "remake", "past": ["remade"], "pp": ["remade"]}, {"base": "rend", "past": ["rent"], "pp": ["rent"]}, {"base": "reread", "past": ["reread"], "pp": ["reread"]}, {"base": "rerun", "past": ["reran"], "pp": ["rerun"]}, {"base": "resell", "past": ["resold"], "pp": ["resold"]}, {"base": "reset", "past": ["reset"], "pp": ["reset"]}, {"base": "restring", "past": ["restrung"], "pp": ["restrung"]}, {"base": "retell", "past": ["retold"], "pp": ["retold"]}, {"base": "rewind", "past": ["rewound"], "pp": ["rewound"]}, {"base": "rewrite", "past": ["rewrote"], "pp": ["rewritten"]}, {"base": "rid", "past": ["rid", "ridded"], "pp": ["rid", "ridded"]}, {"base": "ride", "past": ["rode"], "pp": ["ridden"]}, {"base": "ring", "past": ["rang", "rung"], "pp": ["rung"]}, {"base": "rise", "past": ["rose"], "pp": ["risen"]}, {"base": "run", "past": ["ran"], "pp": ["run"]}, {"base": "saw", "past": ["sawed"], "pp": ["sawn", "sawed"]}, {"base": "say", "past": ["said"], "pp": ["said"]}, {"base": "see", "past": ["saw"], "pp": ["seen"]}, {"base": "seek", "past": ["sought"], "pp": ["sought"]}, {"base": "sell", "past": ["sold"], "pp": ["sold"]}, {"base": "send", "past": ["sent"], "pp": ["sent"]}, {"base": "set", "past": ["set"], "pp": ["set"]}, {"base": "sew", "past": ["sewed"], "pp": ["sewn", "sewed"]}, {"base": "shake", "past": ["shook"], "pp": ["shaken"]}, {"base": "shear", "past": ["sheared"], "pp": ["shorn", "sheared"]}, {"base": "shed", "past": ["shed"], "pp": ["shed"]}, {"base": "shine", "past": ["shone", "shined"], "pp": ["shone", "shined"]}, {"base": "shit", "past": ["shit", "shat"], "pp": ["shit"]}, {"base": "shoot", "past": ["shot"], "pp": ["shot"]}, {"base": "show", "past": ["showed"], "pp": ["shown", "showed"]}, {"base": "shrink", "past": ["shrank", "shrunk"], "pp": ["shrunk"]}, {"base": "shut", "past": ["shut"], "pp": ["shut"]}, {"base": "sing", "past": ["sang", "sung"], "pp": ["sung"]}, {"base": "sink", "past": ["sank", "sunk"], "pp": ["sunk"]}, {"base": "sit", "past": ["sat"], "pp": ["sat"]}, {"base": "slay", "past": ["slew"], "pp": ["slain"]}, {"base": "sleep", "past": ["slept"], "pp": ["slept"]}, {"base": "slide", "past": ["slid"], "pp": ["slid"]}, {"base": "sling", "past": ["slung"], "pp": ["slung"]}, {"base": "slink", "past": ["slunk"], "pp": ["slunk"]}, {"base": "slit", "past": ["slit"], "pp": ["slit"]}, {"base": "smell", "past": ["smelled", "smelt"], "pp": ["smelled", "smelt"]}, {"base": "sow", "past": ["sowed"], "pp": ["sown", "sowed"]}, {"base": "speak", "past": ["spoke"], "pp": ["spoken"]}, {"base": "speed", "past": ["sped", "speeded"], "pp": ["sped", "speeded"]}, {"base": "spell", "past": ["spelled", "spelt"], "pp": ["spelled", "spelt"]}, {"base": "spend", "past": ["spent"], "pp": ["spent"]}, {"base": "spill", "past": ["spilled", "spilt"], "pp": ["spilled", "spilt"]}, {"base": "spin", "past": ["spun", "span"], "pp": ["spun"]}, {"base": "spit", "past": ["spat", "spit"], "pp": ["spat", "spit"]}, {"base": "split", "past": ["split"], "pp": ["split"]}, {"base": "spoil", "past": ["spoiled", "spoilt"], "pp": ["spoiled", "spoilt"]}, {"base": "spread", "past": ["spread"], "pp": ["spread"]}, {"base": "spring", "past": ["sprang", "sprung"], "pp": ["sprung"]}, {"base": "stand", "past": ["stood"], "pp": ["stood"]}, {"base": "steal", "past": ["stole"], "pp": ["stolen"]}, {"base": "stick", "past": ["stuck"], "pp": ["stuck"]}, {"base": "sting", "past": ["stung"], "pp": ["stung"]}, {"base": "stink", "past": ["stank", "stunk"], "pp": ["stunk"]}, {"base": "stride", "past": ["strode"], "pp": ["stridden", "strode"]}, {"base": "strike", "past": ["struck"], "pp": ["struck"]}, {"base": "string", "past": ["strung"], "pp": ["strung"]}, {"base": "strive", "past": ["strove", "strived"], "pp": ["striven", "strived"]}, {"base": "swear", "past": ["swore"], "pp": ["sworn"]}, {"base": "sweat", "past": ["sweat", "sweated"], "pp": ["sweat", "sweated"]}, {"base": "sweep", "past": ["swept"], "pp": ["swept"]}, {"base": "swell", "past": ["swelled"], "pp": ["swollen", "swelled"]}, {"base": "swim", "past": ["swam", "swum"], "pp": ["swum"]}, {"base": "swing", "past": ["swung"], "pp": ["swung"]}, {"base": "take", "past": ["took"], "pp": ["taken"]}, {"base": "teach", "past": ["taught"], "pp": ["taught"]}, {"base": "tear", "past": ["tore"], "pp": ["torn"]}, {"base": "tell", "past": ["told"], "pp": ["told"]}, {"base": "think", "past": ["thought"], "pp": ["thought"]}, {"base": "throw", "past": ["threw"], "pp": ["thrown"]}, {"base": "thrust", "past": ["thrust"], "pp": ["thrust"]}, {"base": "tread", "past": ["trod"], "pp": ["trodden", "trod"]}, {"base": "typeset", "past": ["typeset"], "pp": ["typeset"]}, {"base": "unbend", "past": ["unbent"], "pp": ["unbent"]}, {"base": "unbind", "past": ["unbound"], "pp": ["unbound"]}, {"base": "undergo", "past": ["underwent"], "pp": ["undergone"]}, {"base": "understand", "past": ["understood"], "pp": ["understood"]}, {"base": "undertake", "past": ["undertook"], "pp": ["undertaken"]}, {"base": "underwrite", "past": ["underwrote"], "pp": ["underwritten"]}, {"base": "undo", "past": ["undid"], "pp": ["undone"]}, {"base": "unmake", "past": ["unmade"], "pp": ["unmade"]}, {"base": "unwind", "past": ["unwound"], "pp": ["unwound"]}, {"base": "uphold", "past": ["upheld"], "pp": ["upheld"]}, {"base": "upset", "past": ["upset"], "pp": ["upset"]}, {"base": "wake", "past": ["woke", "waked"], "pp": ["woken", "waked"]}, {"base": "wear", "past": ["wore"], "pp": ["worn"]}, {"base": "weave", "past": ["wove"], "pp": ["woven"]}, {"base": "wed", "past": ["wed", "wedded"], "pp": ["wed", "wedded"]}, {"base": "weep", "past": ["wept"], "pp": ["wept"]}, {"base": "wet", "past": ["wet", "wetted"], "pp": ["wet", "wetted"]}, {"base": "win", "past": ["won"], "pp": ["won"]}, {"base": "wind", "past": ["wound"], "pp": ["wound"]}, {"base": "withdraw", "past": ["withdrew"], "pp": ["withdrawn"]}, {"base": "withhold", "past": ["withheld"], "pp": ["withheld"]}, {"base": "withstand", "past": ["withstood"], "pp": ["withstood"]}, {"base": "wring", "past": ["wrung"], "pp": ["wrung"]}, {"base": "write", "past": ["wrote"], "pp": ["written"]}];
+
+let pool = [];       // verbs in the current round
+let order = [];      // shuffled, shrinks as you go
+let current = null;
+let checked = false;
+let correct = 0;
+let total = 0;
+let history = [];
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function esc(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+}
+
+function updateScore() {
+  document.getElementById("progress").textContent = total + " / " + pool.length;
+  document.getElementById("correct").textContent = correct;
+  document.getElementById("wrong").textContent = total - correct;
+}
+
+function startRound(list) {
+  pool = list;
+  order = shuffle(list.slice());
+  history = [];
+  correct = 0;
+  total = 0;
+  document.getElementById("form").style.display = "";
+  document.getElementById("summary").innerHTML = "";
+  updateScore();
+  nextVerb();
+}
+
+function nextVerb() {
+  if (order.length === 0) { showSummary(); return; }
+  current = order.pop();
+  checked = false;
+  document.getElementById("base").textContent = current.base;
+  document.getElementById("past").value = "";
+  document.getElementById("pp").value = "";
+  document.getElementById("past").disabled = false;
+  document.getElementById("pp").disabled = false;
+  document.getElementById("result").textContent = "";
+  document.getElementById("btn").textContent = "Check";
+  document.getElementById("past").focus();
+}
+
+function check() {
+  const a1 = document.getElementById("past").value.trim().toLowerCase();
+  const a2 = document.getElementById("pp").value.trim().toLowerCase();
+  const ok1 = current.past.includes(a1);
+  const ok2 = current.pp.includes(a2);
+
+  total++;
+  if (ok1 && ok2) correct++;
+  history.push({ verb: current, base: current.base, a1, a2, ok1, ok2,
+                 past: current.past, pp: current.pp });
+
+  const result = document.getElementById("result");
+  result.style.whiteSpace = "pre-line";
+  result.textContent =
+    "Past simple: " + (ok1 ? "correct" : "wrong") + " (" + current.past.join(" / ") + ")\n" +
+    "Past participle: " + (ok2 ? "correct" : "wrong") + " (" + current.pp.join(" / ") + ")";
+
+  updateScore();
+  document.getElementById("past").disabled = true;
+  document.getElementById("pp").disabled = true;
+  document.getElementById("btn").textContent = "Next";
+  document.getElementById("btn").focus();
+  checked = true;
+}
+
+function retryWrong() {
+  startRound(history.filter(h => !(h.ok1 && h.ok2)).map(h => h.verb));
+}
+
+function showSummary() {
+  document.getElementById("form").style.display = "none";
+  document.getElementById("result").textContent = "";
+  const wrongCount = total - correct;
+  let html = "<h2>Done: " + correct + " / " + total + " correct</h2>" +
+    "<button onclick='startRound(verbs)'>Start over (all verbs)</button> ";
+  if (wrongCount > 0) {
+    html += "<button onclick='retryWrong()'>Retry wrong ones only (" + wrongCount + ")</button>";
+  }
+  html += "<table border='1' cellpadding='4'>" +
+    "<tr><th>Verb</th><th>Your past</th><th>Your participle</th><th>Correct answers</th></tr>";
+  for (const h of history) {
+    html += "<tr><td>" + h.base + "</td>" +
+      "<td style='color:" + (h.ok1 ? "green" : "red") + "'>" + esc(h.a1 || "(empty)") + "</td>" +
+      "<td style='color:" + (h.ok2 ? "green" : "red") + "'>" + esc(h.a2 || "(empty)") + "</td>" +
+      "<td>" + h.past.join(" / ") + " — " + h.pp.join(" / ") + "</td></tr>";
+  }
+  document.getElementById("summary").innerHTML = html + "</table>";
+}
+
+document.getElementById("form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  if (checked) nextVerb(); else check();
+});
+
+document.getElementById("past").addEventListener("keydown", function (e) {
+  if (e.key === "Enter" || e.key === "ArrowDown") {
+    e.preventDefault();
+    document.getElementById("pp").focus();
+  }
+});
+
+document.getElementById("pp").addEventListener("keydown", function (e) {
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    document.getElementById("past").focus();
+  }
+});
+
+startRound(verbs);
+</script>
+</body>
+</html>
