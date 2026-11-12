@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quiz transkrypcji IPA</title>
+<title>Fonetyka test 1</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&display=swap">
 <style>
 /* Layout: centered 640px column on pink ground. Setup card -> quiz card with symbol palette -> summary table. Styling follows the user's irregular-verbs quiz. */
@@ -152,8 +152,7 @@ td.wrong { color: var(--bad); font-weight: 600; }
 
 <main class="wrap">
   <header>
-    <h1>Quiz transkrypcji IPA</h1>
-    <p class="lead">Dostajesz słowo, zapisujesz je brytyjską wymową razem z akcentem. Odpowiedź jest porównywana z listą z książki.</p>
+    <h1>Fonetyka test 1</h1>
   </header>
 
   <!-- Wybór sekcji -->
@@ -162,7 +161,6 @@ td.wrong { color: var(--bad); font-weight: 600; }
     <label class="opt">
       <input type="checkbox" id="optStrict" checked>
       <span>Wymagaj akcentu (ˈ ˌ)
-        <small>Po wyłączeniu znaki akcentu są pomijane przy sprawdzaniu.</small>
       </span>
     </label>
     <div class="start-row">
@@ -187,14 +185,12 @@ td.wrong { color: var(--bad); font-weight: 600; }
     <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
 
     <div class="prompt">
-      <span class="label">Zapisz fonetycznie</span>
       <div class="word" id="word"></div>
       <div class="meta"><span class="tag" id="secTag"></span><span id="noteTag"></span></div>
     </div>
 
     <form id="form" autocomplete="off" style="display:flex;flex-direction:column;gap:16px">
       <div class="answer">
-        <label for="ans">Twoja transkrypcja</label>
         <input type="text" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="np. ˈeləfənt">
       </div>
       <div class="palette" id="palette" role="group" aria-label="Symbole fonetyczne"></div>
