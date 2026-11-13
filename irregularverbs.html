@@ -121,7 +121,7 @@ function showSummary() {
     html += "<tr><td>" + h.base + "</td>" +
       "<td style='color:" + (h.ok1 ? "green" : "red") + "'>" + esc(h.a1 || "(empty)") + "</td>" +
       "<td style='color:" + (h.ok2 ? "green" : "red") + "'>" + esc(h.a2 || "(empty)") + "</td>" +
-      "<td>" + h.past.join(" / ") + " — " + h.pp.join(" / ") + "</td></tr>";
+      "<td>" + h.past.join(" / ") + " | " + h.pp.join(" / ") + "</td></tr>";
   }
   document.getElementById("summary").innerHTML = html + "</table>";
 }
